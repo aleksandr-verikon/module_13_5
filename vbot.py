@@ -6,7 +6,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 import asyncio
 
 
-api = ''
+api = '7898781198:AAFPcK1g6Er5calmo2EpyvdhYllVPe_3G7w'
 bot = Bot(token = api)
 dp = Dispatcher(bot, storage = MemoryStorage())
 
@@ -20,15 +20,23 @@ button1 = KeyboardButton(text = 'Рассчитать')
 button2 = KeyboardButton(text = 'Информация')
 kb.add(button1, button2)
 
+
+
 @dp.message_handler(commands = ['start'])
 async def start(message):
-    await message.answer('Привет!', reply_markup = kb)
+    await message.answer('Привет! Я бот помогающий твоему здоровью.', reply_markup = kb)
 
 
 @dp.message_handler(text = ['Рассчитать'])
 async def set_age(message):
     await message.answer('Введите свой возраст:')
     await UserState.age.set()
+
+@dp.message_handler(text = ['Информация'])
+async def info(message):
+    await message.answer('для мужчин: 10 х вес (кг) + 6,25 x рост (см) – 5 х возраст (г) + 5;'
+                              'для женщин: 10 x вес (кг) + 6,25 x рост (см) – 5 x возраст (г) – 161.')
+    await message.answer()
 
 
 @dp.message_handler(state = UserState.age)
@@ -48,9 +56,12 @@ async def send_calories(message, state):
     await state.update_data(weight=message.text)
     data = await state.get_data()
     formula = (int(data['growth']) * 6.25) + (int(data['weight']) * 10) - (int(data['age']) * 5)
-    await message.answer(f"Ваша норма каллорий: {formula}")
+    okruglenie = "{:.2f}".format(formula)
+    await message.answer(f"Ваша норма каллорий: {okruglenie}")
+
+@dp.message_handler()
+async def all_message(message):
+    await message.answer('Введите команду /start, чтобы начать общение.')
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates = True)
-
-# 'Для мужчин: (10 х вес в кг) + (6,25 х рост в см) – (5 х возраст в г) + 5.'
